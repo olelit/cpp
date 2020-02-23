@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <ul class="list-group">
+        {% for item in list %}
+            <a href="{{ request.url }}/{{ item|int }}/{{ type }}" class="list-group-item list-group-item-action rgba-red-strong">{{ item|int }}</a>
+        {% endfor %}
+    </ul>
+{% endblock %}
