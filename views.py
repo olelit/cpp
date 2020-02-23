@@ -34,14 +34,41 @@ def companies(country_id):
 @app.route('/<int:country_id>/company/<int:company_id>/computer_type')
 def computer_type(country_id, company_id):
     computer_type_list = ComputerType.query.all()
-    return render_template('index.html', list=computer_type_list, type='year')
+    return render_template('index.html', list=computer_type_list, type='box_type')
 
 
-@app.route('/<int:country_id>/company/<int:company_id>/computer_type/<int:computer_type_id>/year')
-def year(country_id,company_id, computer_type_id):
+@app.route('/<int:country_id>/company/<int:company_id>/computer_type/<int:computer_type_id>/box_type')
+def box_type(country_id, company_id, computer_type_id):
+    box_type_list = BoxFormat.query.all()
+    return render_template('index.html', list=box_type_list, type='year')
+
+
+@app.route(
+    '/<int:country_id>/company/<int:company_id>/computer_type/<int:computer_type_id>/box_type/<int:box_type_id>/year')
+def year(country_id, company_id, computer_type_id, box_type_id):
     year_list = Computer.query.with_entities(Computer.year).distinct()
-    print(year_list)
-    return render_template('years.html', list=year_list, type='computer')
+    return render_template('no_id.html', list=year_list, type='computer')
+
+
+@app.route('/<int:country_id>/company/<int:company_id>/computer_type/<int:computer_type_id>/box_type/<int:box_type_id>/year/<year>/computer')
+def computer(country_id, company_id, computer_type_id, year, box_type_id):
+    computer_list = Computer.query.filter_by(year=year, company_id=company_id, box_format_id=box_type_id, computer_type_id=computer_type_id)
+    return render_template('index.html', list=computer_list, type='detail_place')
+
+
+@app.route(
+    '/<int:country_id>/company/<int:company_id>/computer_type/<int:computer_type_id>/box_type/<int:box_type_id>/year/<year>/computer/<int:computer>/detail_place')
+def detail_place(country_id, company_id, computer_type_id, year, computer, box_type_id):
+    detail_place_list = Detail.query.filter_by(computer_id=computer).join(DetailPlace).with_entities(
+        DetailPlace.id, DetailPlace.title).distinct()
+    return render_template('index.html', list=detail_place_list, type='detail')
+
+
+@app.route(
+    '/<int:country_id>/company/<int:company_id>/computer_type/<int:computer_type_id>/box_type/<int:box_type_id>/year/<year>/computer/<int:computer>/detail_place/<int:detail_pl>/detail')
+def detail(country_id, company_id, computer_type_id, year, computer, detail_pl, box_type_id):
+    detail_list = Detail.query.filter_by(computer_id=computer, detail_place_id=detail_pl)
+    return render_template('index.html', list=detail_list, type='')
 
 
 @app.route('/form/save', methods=['POST'])
