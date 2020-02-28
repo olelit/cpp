@@ -7,49 +7,63 @@
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
+<body class="overflow-hidden">
 
-<header>
-    <div class="btn-toolbar justify-content-center" role="toolbar">
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#country_modal">Страна
-            </button>
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#company_modal">Компания
-            </button>
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#computer_type_modal">Тип
-                компьютера
-            </button>
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#computer_modal">Компьютер
-            </button>
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#box_format_modal">Формат
-                корпуса
-            </button>
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#detail_place_modal">
-                Расположение детали
-            </button>
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#detail_modal">Деталь
-            </button>
+<main class="row">
+
+    <nav id="sidebar" class="col-3">
+        <div class="sidebar-header">
+            <h3>СПП</h3>
         </div>
-    </div>
-</header>
 
+        <ul class="list-unstyled components">
+            <li><a href="#" data-toggle="modal" data-target="#country_modal">Страна</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#company_modal">Компания</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#computer_type_modal">Тип компьютера</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#computer_modal">Компьютер</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#box_format_modal">Формат корпуса</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#detail_place_modal">Расположение детали</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#detail_modal">Деталь</a></li>
 
-<main class="content container">
-
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item"><a href="#">Library</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Data</li>
-        </ol>
+        </ul>
     </nav>
 
-    {% block content %}{% endblock %}
+    <div class="content container col-9">
+        <nav aria-label="breadcrumb" class="mt-3">
+            <ol class="breadcrumb">
+                {%- for breadcrumb in breadcrumbs -%}
+                    <li class="breadcrumb-item"><a href="{{ breadcrumb.url }}">{{ breadcrumb.text }}</a></li>
+                {%- endfor -%}
+            </ol>
+        </nav>
+
+        {% block content %}{% endblock %}
+
+        {% set count = list.pages + 1 %}
+        <nav class="position-absolute pagination mb-5">
+            <ul class="pagination">
+                {% if list.has_prev %}
+                    <li class="page-item"><a class="page-link" href="{{ request.base_url }}?page={{ list.prev_num }}">Previous</a>
+                    </li>
+                {% endif %}
+
+                {% for i in range(1, count) %}
+                    <li class="page-item {% if list.page == i %} active {% endif %}"><a class="page-link"
+                                                                                        href="{{ request.base_url }}?page={{ i }}">{{ i }}</a>
+                    </li>
+                {% endfor %}
+
+                {% if list.has_next %}
+                    <li class="page-item"><a class="page-link"
+                                             href="{{ request.base_url }}?page={{ list.next_num }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
 </main>
 
+
 <div>
-
-
     {% for form in company_form %}
         <div class="modal fade" id="{{ form.id }}" tabindex="-1" role="dialog"
              aria-labelledby="exampleModalCenterTitle" aria-hidden="true">

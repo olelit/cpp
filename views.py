@@ -1,9 +1,14 @@
 from time import strptime
 
+from flask_breadcrumbs import register_breadcrumb
+
 from app import app, db
 from forms import *
 from models import *
 from flask import Flask, render_template, redirect, url_for, request
+
+PER_PAGE_COUNT = 5
+page_num = 1
 
 
 @app.context_processor
@@ -20,54 +25,92 @@ def create_forms():
 
 
 @app.route('/')
+@register_breadcrumb(app, '.', 'Страна')
 def countries():
-    country_list = Country.query.all()
+    page_num = request.args.get("page")
+    if not page_num:
+        page_num = 1
+    country_list = Country.query.paginate(per_page=PER_PAGE_COUNT, page=int(page_num), error_out=False)
     return render_template('index.html', list=country_list, type='company')
 
 
 @app.route('/<int:country_id>/company')
+@register_breadcrumb(app, '.country_id', 'Компания')
 def companies(country_id):
-    company_list = Company.query.filter_by(id=country_id)
+    page_num = request.args.get("page")
+    if not page_num:
+        page_num = 1
+    company_list = Company.query.filter_by(id=country_id).paginate(per_page=PER_PAGE_COUNT, page=int(page_num),
+                                                                   error_out=False)
     return render_template('index.html', list=company_list, type='computer_type')
 
 
 @app.route('/<int:country_id>/company/<int:company_id>/computer_type')
+@register_breadcrumb(app, '.country_id.company_id', 'Тип компьютера')
 def computer_type(country_id, company_id):
-    computer_type_list = ComputerType.query.all()
+    page_num = request.args.get("page")
+    if not page_num:
+        page_num = 1
+    computer_type_list = ComputerType.query.paginate(per_page=PER_PAGE_COUNT, page=int(page_num), error_out=False)
     return render_template('index.html', list=computer_type_list, type='box_type')
 
 
 @app.route('/<int:country_id>/company/<int:company_id>/computer_type/<int:computer_type_id>/box_type')
+@register_breadcrumb(app, '.country_id.company_id.computer_type_id', 'Тип корпуса')
 def box_type(country_id, company_id, computer_type_id):
-    box_type_list = BoxFormat.query.all()
+    page_num = request.args.get("page")
+    if not page_num:
+        page_num = 1
+    box_type_list = BoxFormat.query.paginate(per_page=PER_PAGE_COUNT, page=int(page_num), error_out=False)
     return render_template('index.html', list=box_type_list, type='year')
 
 
 @app.route(
     '/<int:country_id>/company/<int:company_id>/computer_type/<int:computer_type_id>/box_type/<int:box_type_id>/year')
+@register_breadcrumb(app, '.country_id.company_id.computer_type_id.box_type_id', 'Год выпуска')
 def year(country_id, company_id, computer_type_id, box_type_id):
-    year_list = Computer.query.with_entities(Computer.year).distinct()
+    page_num = request.args.get("page")
+    if not page_num:
+        page_num = 1
+    year_list = Computer.query.with_entities(Computer.year).distinct().paginate(per_page=PER_PAGE_COUNT, page=int(page_num),
+                                                                                error_out=False)
     return render_template('no_id.html', list=year_list, type='computer')
 
 
-@app.route('/<int:country_id>/company/<int:company_id>/computer_type/<int:computer_type_id>/box_type/<int:box_type_id>/year/<year>/computer')
+@app.route(
+    '/<int:country_id>/company/<int:company_id>/computer_type/<int:computer_type_id>/box_type/<int:box_type_id>/year/<year>/computer')
+@register_breadcrumb(app, '.country_id.company_id.computer_type_id.box_type_id.year', 'Компьютеры')
 def computer(country_id, company_id, computer_type_id, year, box_type_id):
-    computer_list = Computer.query.filter_by(year=year, company_id=company_id, box_format_id=box_type_id, computer_type_id=computer_type_id)
+    page_num = request.args.get("page")
+    if not page_num:
+        page_num = 1
+    computer_list = Computer.query.filter_by(year=year, company_id=company_id, box_format_id=box_type_id,
+                                             computer_type_id=computer_type_id).paginate(per_page=PER_PAGE_COUNT,
+                                                                                         page=int(page_num), error_out=False)
     return render_template('index.html', list=computer_list, type='detail_place')
 
 
 @app.route(
     '/<int:country_id>/company/<int:company_id>/computer_type/<int:computer_type_id>/box_type/<int:box_type_id>/year/<year>/computer/<int:computer>/detail_place')
+@register_breadcrumb(app, '.country_id.company_id.computer_type_id.box_type_id.year.computer', 'Расположение детали')
 def detail_place(country_id, company_id, computer_type_id, year, computer, box_type_id):
+    page_num = request.args.get("page")
+    if not page_num:
+        page_num = 1
     detail_place_list = Detail.query.filter_by(computer_id=computer).join(DetailPlace).with_entities(
-        DetailPlace.id, DetailPlace.title).distinct()
+        DetailPlace.id, DetailPlace.title).distinct().paginate(per_page=PER_PAGE_COUNT, page=int(page_num), error_out=False)
     return render_template('index.html', list=detail_place_list, type='detail')
 
 
 @app.route(
     '/<int:country_id>/company/<int:company_id>/computer_type/<int:computer_type_id>/box_type/<int:box_type_id>/year/<year>/computer/<int:computer>/detail_place/<int:detail_pl>/detail')
+@register_breadcrumb(app, '.country_id.company_id.computer_type_id.box_type_id.year.computer.detail_pl', 'Деталь')
 def detail(country_id, company_id, computer_type_id, year, computer, detail_pl, box_type_id):
-    detail_list = Detail.query.filter_by(computer_id=computer, detail_place_id=detail_pl)
+    page_num = request.args.get("page")
+    if not page_num:
+        page_num = 1
+    detail_list = Detail.query.filter_by(computer_id=computer, detail_place_id=detail_pl).paginate(
+        per_page=PER_PAGE_COUNT, page=int(page_num), error_out=False)
     return render_template('index.html', list=detail_list, type='')
 
 

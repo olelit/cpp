@@ -3,8 +3,8 @@
 {% block content %}
 
     <ul class="list-group">
-        {% for item in list %}
-            <a href="{{ request.url }}/{{ item[0] }}/{{ type }}" class="list-group-item list-group-item-action rgba-red-strong">{{ item[0] }}</a>
+        {% for item in list.items %}
+            <a href="{{ request.base_url }}/{{ item[0] }}/{{ type }}" class="list-group-item list-group-item-action rgba-red-strong">{{ item[0] }}</a>
         {% endfor %}
     </ul>
 {% endblock %}
